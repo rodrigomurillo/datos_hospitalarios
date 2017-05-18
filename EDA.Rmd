@@ -101,14 +101,26 @@ rf_sex <- foreach(ntree=rep(250, 2), .combine=combine, .multicombine=TRUE,
               .packages='randomForest') %dopar% {
     randomForest(CodSexo ~. , data = db[c(var_rf)], na.action = "na.omit", ntree=ntree)
               }
-varImpPlot(rf_vez)
+varImpPlot(rf_sex)
 
 ```
+
+```{r}
+ggplot(db,aes(CodParentescoAgresor)) +
+  geom_bar(aes(fill=CodSexo))
+
+```
+
 
 ```{r}
 ggplot(db,aes(Edad)) +
   geom_histogram(aes(fill=CodSexo),binwidth = 1) +
   xlim(0,100)
+```
+
+```{r}
+ggplot(db,aes(CodSitio)) +
+  geom_bar(aes(fill=CodSexo))
 
 ```
 
