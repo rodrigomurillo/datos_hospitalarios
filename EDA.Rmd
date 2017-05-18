@@ -1,0 +1,114 @@
+---
+title: "Análisis Exploratorio"
+output: html_notebook
+---
+
+```{r}
+# load("./DB/Datos_hospitalarios.rds")
+# Corregir la edad
+summary(db)
+```
+
+# Clasificación
+
+Se utilizará la variable tipo de violencia para plantear un problema de clasificación y entender la interacción entre variables.
+
+```{r}
+library(randomForest)
+library(doMC)
+# Quite estado porque al tener muchos niveles sesgaba el modelo 
+# Embarazada lo quite del análisis general, vale la pena incluirla cuando se analice solo a las mujeres
+var_rf <- c("Edad", "CodSexo","CodLeeEscribe","CodEscolaridad","CodFestivo","CodIntencionalidad","CodVez",
+            "CodSitio", "CodAgente","CodArea","CodConsecuencia","CodPrehospitalaria","CodAgresor","CodSexoAgresor","CodParentescoAgresor",
+            "CodDestino","CodTipoAtencion","CodTipoViolencia")
+registerDoMC()
+rf_vez <- foreach(ntree=rep(300, 3), .combine=combine, .multicombine=TRUE,
+              .packages='randomForest') %dopar% {
+    randomForest(CodTipoViolencia ~. , data = db[c(var_rf)], na.action = "na.omit", ntree=ntree)
+              }
+
+```
+
+```{r}
+varImpPlot(rf)
+summary(rf)
+```
+
+```{r}
+registerDoMC()
+rf_vez <- foreach(ntree=rep(250, 2), .combine=combine, .multicombine=TRUE,
+              .packages='randomForest') %dopar% {
+    randomForest(CodVez ~. , data = db[c(var_rf)], na.action = "na.omit", ntree=ntree)
+              }
+varImpPlot(rf_vez)
+```
+
+
+# Gráficas
+```{r}
+library(ggplot2)
+ggplot(db,aes(CodEstado)) +
+  geom_bar(aes(fill=CodVez))
+```
+```{r}
+ggplot(db,aes(CodParentescoAgresor)) +
+  geom_bar(aes(fill=CodVez))
+
+```
+
+
+```{r}
+ggplot(db,aes(CodConsecuencia)) +
+  geom_bar(aes(fill=CodVez))
+
+```
+
+```{r}
+ggplot(db,aes(Edad)) +
+  geom_histogram(aes(fill=CodVez),binwidth = 1) +
+  xlim(0,100)
+
+```
+```{r}
+ggplot(db,aes(CodEscolaridad)) +
+  geom_bar(aes(fill=CodVez))
+
+```
+
+```{r}
+ggplot(db,aes(CodTipoViolencia)) +
+  geom_bar(aes(fill=CodVez))
+```
+
+# Análisis por género
+
+```{r}
+ggplot(db,aes(CodSexo)) +
+  geom_bar(aes(fill=CodTipoViolencia))
+```
+
+```{r}
+ggplot(db,aes(CodSexo)) +
+  geom_bar(aes(fill=CodSexoAgresor))
+
+```
+
+
+```{r}
+registerDoMC()
+
+rf_sex <- foreach(ntree=rep(250, 2), .combine=combine, .multicombine=TRUE,
+              .packages='randomForest') %dopar% {
+    randomForest(CodSexo ~. , data = db[c(var_rf)], na.action = "na.omit", ntree=ntree)
+              }
+varImpPlot(rf_vez)
+
+```
+
+```{r}
+ggplot(db,aes(Edad)) +
+  geom_histogram(aes(fill=CodSexo),binwidth = 1) +
+  xlim(0,100)
+
+```
+

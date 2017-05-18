@@ -86,6 +86,9 @@ db$CodTipoViolencia <- as.factor(mapvalues(db$CodTipoViolencia, from=aux$CodTipo
 # Tipo de atención
 aux <- read.csv("./DB/Catalogos Lesiones 2010 a 2014/cTipoAtencion.csv", header = T)
 db$CodTipoAtencion <- as.factor(mapvalues(db$CodTipoAtencion, from=aux$CodTipoAtencion, to= as.character(aux$Descripcion)))
+# Escolaridad
+aux <- read.csv("./DB/Catalogos Lesiones 2010 a 2014/cEscolaridad.csv", header = T)
+db$CodEscolaridad <- as.factor(mapvalues(db$CodEscolaridad, from=aux$CodEscolaridad, to= as.character(aux$Descripcion)))
 
 # Estandarizar la edad para que todo esté en años
 db[db$CodClaveEdad == "MESES",]$Edad <- db[db$CodClaveEdad == "MESES",]$Edad / 12
