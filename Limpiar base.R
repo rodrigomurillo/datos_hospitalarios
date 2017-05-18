@@ -87,6 +87,11 @@ db$CodTipoViolencia <- as.factor(mapvalues(db$CodTipoViolencia, from=aux$CodTipo
 aux <- read.csv("./DB/Catalogos Lesiones 2010 a 2014/cTipoAtencion.csv", header = T)
 db$CodTipoAtencion <- as.factor(mapvalues(db$CodTipoAtencion, from=aux$CodTipoAtencion, to= as.character(aux$Descripcion)))
 
-# Gráficas
+# Estandarizar la edad para que todo esté en años
+db[db$CodClaveEdad == "MESES",]$Edad <- db[db$CodClaveEdad == "MESES",]$Edad / 12
+db[db$CodClaveEdad == "DIAS",]$Edad <- db[db$CodClaveEdad == "DIAS",]$Edad / 365
+db[db$CodClaveEdad == "HORAS",]$Edad <- db[db$CodClaveEdad == "HORAS",]$Edad / (365+24)
+
+# Guardar la base
 saveRDS(db, file = "./DB/Datos_hospitalarios.rds")
 
