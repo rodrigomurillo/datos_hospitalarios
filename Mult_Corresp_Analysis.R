@@ -2,7 +2,7 @@ library(FactoMineR)
 library(ggplot2)
 library(lubridate)
 
-db <- readRDS("../DB/Datos_hospitalarios_completa.rds")
+db <- readRDS("./DB/Datos_hospitalarios_completa.rds")
 
 db <- db[!is.na(db$CodSexo),]
 db <- db[!is.na(db$CodEscolaridad),]
@@ -112,7 +112,7 @@ ggplot(data = mca_vars_df, aes(x = Dim.1, y = Dim.2, label = rownames(mca_vars_d
   geom_vline(xintercept = 0, colour = "gray70") + 
   geom_text(aes(colour = Variable)) + 
   ggtitle("Grafica de MCA: Sexo, Causa, Edad y Alfabetismo")
-ggsave("../Images/Grafica_Sexo_Causa_Edad_Lee.png", plot=last_plot(), width = 45, height = 45/2.5, units = "cm")
+ggsave("./Images/Grafica_Sexo_Causa_Edad_Lee.png", plot=last_plot(), width = 45, height = 45/2.5, units = "cm")
 
 #------Beneficiarios de los seguros
 
@@ -136,3 +136,28 @@ ggplot(data = mca_vars_df, aes(x = Dim.1, y = Dim.2, label = rownames(mca_vars_d
   ggtitle("Grafica de MDS")
 
 
+#-----Análisis FInal
+
+causas <- names(sort(summary(db$DscAfecprinGrouped), decreasing = T)[1:10])
+db_aux <- db[db$DscAfecprinGrouped == causas,]
+
+
+cols <-c("DscAfecprinGrouped","CodEscolaridad","Edad_Cut")
+rm(mca)
+mca <- MCA(db_aux[c(cols)], graph = F)
+mca$eig
+
+cats = apply(db_aux[c(cols)], 2, function(x) nlevels(as.factor(x)))
+
+
+mca_vars_df = data.frame(mca$var$coord, Variable = rep(names(cats), cats))
+mca_obs_df = data.frame(mca$ind$coord)
+
+
+# Grafica de las categorias de las variables
+ggplot(data = mca_vars_df, aes(x = Dim.1, y = Dim.2, label = rownames(mca_vars_df))) + 
+  geom_hline(yintercept = 0, colour = "gray70") + 
+  geom_vline(xintercept = 0, colour = "gray70") + 
+  geom_text(aes(colour = Variable)) + 
+  ggtitle("Grafica de MDS")
+ggsave("./Images/Grafica_Sexo_Causa_Edad_Lee.png", plot=last_plot(), width = 45, height = 45/2.5, units = "cm")
