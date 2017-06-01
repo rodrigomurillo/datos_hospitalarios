@@ -54,7 +54,53 @@ ggplot(eventos[which(!is.na(eventos$CodSexo)),],aes(x=CodSexo,fill=CodSexo)) + g
   scale_y_continuous(labels=function(x) format(x, big.mark = ",", scientific = FALSE)) +
   theme(axis.text.x = element_text(angle=90,size=12,vjust=0.3))
 
+ggplot(eventos[which(!is.na(eventos$Edad_Cut)),],aes(x=Edad_Cut,fill=Edad_Cut)) + geom_bar() +
+  ggtitle("Edad del afectado") +
+  labs(x="Edad",y="# Casos") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
+  coord_flip() +
+  geom_text(stat='count',
+            aes(label=format(..count.., big.mark = ",", scientific = FALSE)),
+            size=6,hjust=1.1, vjust=0.5) +
+  guides(fill=FALSE) +
+  scale_y_continuous(labels=function(x) format(x, big.mark = ",", scientific = FALSE)) +
+  theme(axis.text.x = element_text(angle=90,size=12,vjust=0))
 
+ggplot(eventos[which(!is.na(eventos$CodEscolaridad)),],aes(x=CodEscolaridad,fill=CodEscolaridad)) + geom_bar() +
+  ggtitle("Escolaridad del afectado") +
+  labs(x="Escolaridad",y="# Casos") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
+  coord_flip() +
+  geom_text(stat='count',
+            aes(label=format(..count.., big.mark = ",", scientific = FALSE)),
+            size=4,hjust=0.8, vjust=0.5) +
+  guides(fill=FALSE) +
+  scale_y_continuous(labels=function(x) format(x, big.mark = ",", scientific = FALSE)) +
+  theme(axis.text.x = element_text(angle=90,size=12,vjust=0))
+
+ggplot(eventos[which(!is.na(eventos$CodLeeEscribe)),],aes(x=CodLeeEscribe,fill=CodLeeEscribe)) + geom_bar() +
+  ggtitle("Alfabetismo del afectado") +
+  labs(x="Sabe leer y escribir",y="# Casos") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
+  coord_flip() +
+  geom_text(stat='count',
+            aes(label=format(..count.., big.mark = ",", scientific = FALSE)),
+            size=6,hjust=1.1, vjust=0) +
+  guides(fill=FALSE) +
+  scale_y_continuous(labels=function(x) format(x, big.mark = ",", scientific = FALSE)) +
+  theme(axis.text.x = element_text(angle=90,size=12,vjust=0.3))
+
+ggplot(eventos[which(!is.na(eventos$CodDerechohabiencia)),],aes(x=reorder(CodDerechohabiencia,table(eventos$CodDerechohabiencia)[eventos$CodDerechohabiencia]),fill=CodDerechohabiencia)) + geom_bar() +
+  ggtitle("Derechohabiencia del afectado") +
+  labs(x="Tipo de seguro",y="# Casos") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
+  coord_flip() +
+  geom_text(stat='count',
+            aes(label=format(..count.., big.mark = ",", scientific = FALSE)),
+            size=4,hjust=0.6, vjust=0.5) +
+  guides(fill=FALSE) +
+  scale_y_continuous(labels=function(x) format(x, big.mark = ",", scientific = FALSE)) +
+  theme(axis.text.x = element_text(angle=90,size=12,vjust=0.3))
 
 
 temp <- eventos
@@ -88,4 +134,5 @@ ggplot(data = mca_vars_df, aes(x = Dim.1, y = Dim.2, label = rownames(mca_vars_d
 data(housetasks)
 head(housetasks)
 class(housetasks)
+
 
