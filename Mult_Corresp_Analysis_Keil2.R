@@ -2,6 +2,7 @@ library(FactoMineR)
 library(ggplot2)
 library(lubridate)
 library(dplyr)
+library(ggrepel)
 
 getwd()
 setwd("C:/Users/stuka/Desktop/datos_hospitalarios/")
@@ -69,7 +70,19 @@ db_anal2$Edad_Group <- factor(db_anal2$Edad_Group,levels=c("Bebe","Niño_a","Ado
 
 db_anal2$Escolaridad_Grouped <-as.character(db_anal2$CodEscolaridad)
 db_anal2$Escolaridad_Grouped
-table(db_anal2$Edad_Group)
+db_anal2$Escolaridad_Grouped <- ifelse(db_anal2$Escolaridad_Grouped  %in% c("PRIMARIA","SECUNDARIA"),"PRIM_SEC",db_anal2$Escolaridad_Grouped)
+db_anal2$Escolaridad_Grouped <- ifelse(db_anal2$Escolaridad_Grouped  %in% c("OTRA","BACHILLERATO"),"PREPA",db_anal2$Escolaridad_Grouped)
+db_anal2$Escolaridad_Grouped <- ifelse(db_anal2$Edad_Group  %in% c("Bebe","Niño_a","Adolesc"),"ES MENOR",db_anal2$Escolaridad_Grouped)
+
+table(db_anal2$Escolaridad_Grouped)
+
+
+
+db_anal2$Escolaridad_Grouped <- factor(db_anal2$Escolaridad_Grouped,levels=c("ES MENOR","NINGUNA","PRIM_SEC","PREPA","SUPERIOR"), ordered=T)
+
+db_anal2 <- db_anal2[!is.na(db_anal2$CodSexo),]
+db_anal2 <- db_anal2[!is.na(db_anal2$Edad_Group),]
+db_anal2 <- db_anal2[!is.na(db_anal2$Escolaridad_Grouped),]
 
 # Combinar Edad y Escolaridad
 db_anal2$Socio_Dem <- as.factor(paste(db_anal2$CodSexo,db_anal2$Edad_Cut, db_anal2$CodEscolaridad,db_anal2$CodDerechohabienciaRegroup, sep = "_"))
@@ -103,13 +116,13 @@ Causa_Cat$Freq <- NULL
 db_anal2 <- left_join(db_anal2,Causa_Cat)
 
 
-
-cols <-c("CodArea","CodSexo","Edad_Cut")
+cols <-c("CodSexo","Edad_Group","Escolaridad_Grouped","CodDerechohabienciaRegroup2","Afeccion","Causa")
 rm(mca)
-mca <- MCA(db[c(cols)], graph = F)
-mca$eig
+mca <- MCA(db_anal2[c(cols)], graph = F)
+tab <- cbind(rownames(mca$eig),mca$eig$`percentage of variance`)
+write.csv(tab,"dimensiones.csv")
 
-cats = apply(db[c(cols)], 2, function(x) nlevels(as.factor(x)))
+cats = apply(db_anal2[c(cols)], 2, function(x) nlevels(as.factor(x)))
 
 
 mca_vars_df = data.frame(mca$var$coord, Variable = rep(names(cats), cats))
@@ -120,10 +133,32 @@ mca_obs_df = data.frame(mca$ind$coord)
 ggplot(data = mca_vars_df, aes(x = Dim.1, y = Dim.2, label = rownames(mca_vars_df))) + 
   geom_hline(yintercept = 0, colour = "gray70") + 
   geom_vline(xintercept = 0, colour = "gray70") + 
-  geom_text(aes(colour = Variable)) + 
-  ggtitle("Grafica de MCA: Área afectada, Sexo y edad")
-ggsave("../Images/Grafica_Sexo_Area_Edad.png", plot=last_plot(), width = 45, height = 45/2.5, units = "cm")
+  geom_label_repel(aes(colour = Variable),fontface="bold",size=3) + 
+  ggtitle("Grafica de MCA: Afeccion, Causa y Socio demograficas - Dim 1 vs Dim 2 = Varianza explicada 17%") +
+  xlab("Dimensión 1 - 10% de la varianza") +
+  ylab("Dimensión 2 - 7% de la varianza") +
+  theme(legend.position="bottom")
+ggsave("./Images/Grafica_Afec_Causa_Sociodem_dim1_2.png", plot=last_plot(), width = 45, height = 45/2.5, units = "cm")
 
+ggplot(data = mca_vars_df, aes(x = Dim.1, y = Dim.3, label = rownames(mca_vars_df))) + 
+  geom_hline(yintercept = 0, colour = "gray70") + 
+  geom_vline(xintercept = 0, colour = "gray70") + 
+  geom_label_repel(aes(colour = Variable),fontface="bold",size=3) + 
+  ggtitle("Grafica de MCA: Afeccion, Causa y Socio demograficas - Dim 1 vs Dim 3 = Varianza explicada 16.5%") +
+  xlab("Dimensión 1 - 10% de la varianza") +
+  ylab("Dimensión 3 - 6.5% de la varianza") +
+  theme(legend.position="bottom")
+
+ggplot(data = mca_vars_df, aes(x = Dim.2, y = Dim.3, label = rownames(mca_vars_df))) + 
+  geom_hline(yintercept = 0, colour = "gray70") + 
+  geom_vline(xintercept = 0, colour = "gray70") + 
+  geom_label_repel(aes(colour = Variable),fontface="bold",size=3) + 
+  ggtitle("Grafica de MCA: Afeccion, Causa y Socio demograficas - Dim 2 vs Dim 3 = Varianza explicada 13.5%") +
+  xlab("Dimensión 2 - 7% de la varianza") +
+  ylab("Dimensión 3 - 6.5% de la varianza") +
+  theme(legend.position="bottom")
+
+?geom_text_repel
 #------------------------
 cols <-c("CodArea","CodSexo","CodDerechohabienciaRegroup")
 rm(mca)
